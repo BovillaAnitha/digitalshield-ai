@@ -1,3 +1,4 @@
+import IncidentTimeline from "./IncidentTimeline";
 import EvidenceVault from "./EvidenceVault";
 import { useState } from "react";
 import "./App.css";
@@ -144,6 +145,7 @@ function App() {
           </section>
         )}
         <EvidenceVault />
+        <IncidentTimeline />
       </main>
     </div>
   );

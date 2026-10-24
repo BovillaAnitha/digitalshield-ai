@@ -1,3 +1,4 @@
+from incidents import router as incidents_router
 from evidence import router as evidence_router
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -15,6 +16,7 @@ app.add_middleware(
 )
 
 app.include_router(evidence_router)
+app.include_router(incidents_router)
 class ConversationRequest(BaseModel):
     text: str = Field(min_length=1, max_length=20000)
 

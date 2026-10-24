@@ -1,0 +1,207 @@
+
+import { useEffect, useState } from "react";
+
+const API = "http://127.0.0.1:8000";
+
+export default function IncidentTimeline() {
+  const [incidents, setIncidents] = useState([]);
+  const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState({
+    title: "",
+    description: "",
+    category: "Harassment",
+    occurred_at: "",
+    evidence_id: "",
+  });
+
+  async function loadIncidents() {
+    try {
+      const response = await fetch(`${API}/incidents`);
+      if (!response.ok) throw new Error("Could not load incidents.");
+      setIncidents(await response.json());
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
+  useEffect(() => {
+    loadIncidents();
+  }, []);
+
+  function update(event) {
+    setForm({
+      ...form,
+      [event.target.name]: event.target.value,
+    });
+  }
+
+  async function addIncident(event) {
+    event.preventDefault();
+    setSaving(true);
+    setError("");
+
+    try {
+      const response = await fetch(`${API}/incidents`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...form,
+          occurred_at: new Date(form.occurred_at).toISOString(),
+          evidence_id: form.evidence_id.trim() || null,
+        }),
+      });
+
+      if (!response.ok) throw new Error("Could not save incident.");
+
+      setForm({
+        title: "",
+        description: "",
+        category: "Harassment",
+        occurred_at: "",
+        evidence_id: "",
+      });
+
+      await loadIncidents();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function downloadReport() {
+    setError("");
+
+    try {
+      const response = await fetch(`${API}/incidents/report`);
+
+      if (!response.ok) {
+        throw new Error("Add an incident before exporting.");
+      }
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "digitalshield-report.pdf";
+      link.click();
+
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
+  return (
+    <section className="panel">
+      <h2>📅 Incident Timeline</h2>
+      <p className="muted">
+        Document events chronologically using fictional
+        information for this prototype.
+      </p>
+
+      <form onSubmit={addIncident} className="incident-form">
+        <label>
+          Incident title
+          <input
+            name="title"
+            value={form.title}
+            onChange={update}
+            placeholder="e.g. Repeated unwanted messages"
+            maxLength={150}
+            required
+          />
+        </label>
+
+        <label>
+          Date and time of incident
+          <input
+            type="datetime-local"
+            name="occurred_at"
+            value={form.occurred_at}
+            onChange={update}
+            required
+          />
+        </label>
+
+        <label>
+          Category
+          <select
+            name="category"
+            value={form.category}
+            onChange={update}
+          >
+            <option>Harassment</option>
+            <option>Threat</option>
+            <option>Impersonation</option>
+            <option>Privacy violation</option>
+            <option>Other</option>
+          </select>
+        </label>
+
+        <label>
+          Description
+          <textarea
+            name="description"
+            value={form.description}
+            onChange={update}
+            placeholder="Describe what happened..."
+            rows={4}
+            maxLength={3000}
+            required
+          />
+        </label>
+
+        <label>
+          Evidence ID (optional)
+          <input
+            name="evidence_id"
+            value={form.evidence_id}
+            onChange={update}
+            placeholder="Paste ID from Evidence Vault"
+          />
+        </label>
+
+        <button type="submit" disabled={saving}>
+          {saving ? "Saving..." : "Add Incident"}
+        </button>
+      </form>
+
+      {error && <p className="error" role="alert">{error}</p>}
+
+      <div className="timeline-header">
+        <h3>Recorded Incidents ({incidents.length})</h3>
+        <button
+          type="button"
+          onClick={downloadReport}
+          disabled={incidents.length === 0}
+        >
+          Download PDF Report
+        </button>
+      </div>
+
+      {incidents.length === 0 ? (
+        <p className="muted">No incidents recorded yet.</p>
+      ) : (
+        <div className="timeline">
+          {incidents.map((incident) => (
+            <article className="timeline-item" key={incident.id}>
+              <small>
+                {new Date(incident.occurred_at).toLocaleString()}
+              </small>
+              <h4>{incident.title}</h4>
+              <strong>{incident.category}</strong>
+              <p>{incident.description}</p>
+              {incident.evidence_id && (
+                <small>
+                  Evidence reference: {incident.evidence_id}
+                </small>
+              )}
+            </article>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
