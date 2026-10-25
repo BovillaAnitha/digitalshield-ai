@@ -155,3 +155,57 @@ def verify_media(evidence_id: str):
         "stored_sha256": row["sha256"],
         "current_sha256": digest.hexdigest()
     }
+
+
+
+
+@router.delete("/{evidence_id}")
+def delete_media(evidence_id: str):
+    with connect() as db:
+        db.row_factory = sqlite3.Row
+
+        record = db.execute(
+            """
+            SELECT stored_name
+            FROM media_evidence
+            WHERE id = ?
+            """,
+            (evidence_id,)
+        ).fetchone()
+
+        if record is None:
+            raise HTTPException(
+                status_code=404,
+                detail="Media evidence not found."
+            )
+
+        stored_name = record["stored_name"]
+
+        if Path(stored_name).name != stored_name:
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid stored filename."
+            )
+
+        file_path = UPLOAD_DIR / stored_name
+
+        try:
+            file_path.unlink(missing_ok=True)
+        except OSError:
+            raise HTTPException(
+                status_code=500,
+                detail="Could not delete media file."
+            )
+
+        db.execute(
+            """
+            DELETE FROM media_evidence
+            WHERE id = ?
+            """,
+            (evidence_id,)
+        )
+
+    return {
+        "message": "Media evidence deleted successfully.",
+        "id": evidence_id
+    }

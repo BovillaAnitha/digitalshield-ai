@@ -160,3 +160,44 @@ def verify_evidence(evidence_id: str):
         "original_sha256": record["sha256"],
         "current_sha256": current_hash,
     }
+
+
+
+
+
+
+@router.delete("/{evidence_id}")
+def delete_evidence(evidence_id: str):
+    with get_db() as db:
+        record = db.execute(
+            "SELECT stored_name FROM evidence WHERE id = ?",
+            (evidence_id,)
+        ).fetchone()
+
+        if record is None:
+            raise HTTPException(
+                status_code=404,
+                detail="Evidence not found."
+            )
+
+        file_path = UPLOAD_DIR / record["stored_name"]
+
+        # Remove the uploaded file.
+        try:
+            file_path.unlink(missing_ok=True)
+        except OSError:
+            raise HTTPException(
+                status_code=500,
+                detail="Could not delete evidence file."
+            )
+
+        # Remove the corresponding database record.
+        db.execute(
+            "DELETE FROM evidence WHERE id = ?",
+            (evidence_id,)
+        )
+
+    return {
+        "message": "Evidence deleted successfully.",
+        "id": evidence_id,
+    }

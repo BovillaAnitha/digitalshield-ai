@@ -1713,3 +1713,38 @@ textarea:focus {
     min-width: 0;
   }
 }
+
+
+.delete-evidence-btn {
+  margin-left: 10px;
+  padding: 9px 14px;
+  background: #fff1f2;
+  color: #be123c;
+  border: 1px solid #fecdd3;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.delete-evidence-btn:hover {
+  background: #ffe4e6;
+}
+
+.delete-evidence-btn {
+  padding: 9px 14px;
+  background: #fff1f2;
+  color: #be123c;
+  border: 1px solid #fecdd3;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.delete-evidence-btn:hover {
+  background: #ffe4e6;
+}
+
+.delete-evidence-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

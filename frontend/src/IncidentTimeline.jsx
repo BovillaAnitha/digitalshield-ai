@@ -15,24 +15,38 @@ export default function IncidentTimeline({ incidentDraft }) {
   const [incidents, setIncidents] = useState([]);
   const [evidenceFiles, setEvidenceFiles] = useState([]);
   const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
   const [saving, setSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
   const [form, setForm] = useState(emptyForm);
 
+  // Load previously recorded incidents
   async function loadIncidents() {
     try {
       const response = await fetch(`${API}/incidents`);
-      if (!response.ok) throw new Error("Could not load incidents.");
-      setIncidents(await response.json());
+
+      if (!response.ok) {
+        throw new Error("Could not load incidents.");
+      }
+
+      const data = await response.json();
+      setIncidents(data);
     } catch (err) {
       setError(err.message);
     }
   }
 
+  // Load available evidence files
   async function loadEvidence() {
     try {
       const response = await fetch(`${API}/evidence`);
-      if (!response.ok) throw new Error("Could not load evidence.");
-      setEvidenceFiles(await response.json());
+
+      if (!response.ok) {
+        throw new Error("Could not load evidence.");
+      }
+
+      const data = await response.json();
+      setEvidenceFiles(data);
     } catch (err) {
       console.error(err);
     }
@@ -43,6 +57,7 @@ export default function IncidentTimeline({ incidentDraft }) {
     loadEvidence();
   }, []);
 
+  // Populate form when creating incident from analysis
   useEffect(() => {
     if (incidentDraft) {
       setForm(incidentDraft);
@@ -57,18 +72,25 @@ export default function IncidentTimeline({ incidentDraft }) {
     }));
   }
 
+  // Create a new incident
   async function addIncident(event) {
     event.preventDefault();
+
     setSaving(true);
     setError("");
+    setMessage("");
 
     try {
       const response = await fetch(`${API}/incidents`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           ...form,
-          occurred_at: new Date(form.occurred_at).toISOString(),
+          occurred_at: new Date(
+            form.occurred_at
+          ).toISOString(),
           evidence_id: form.evidence_id || null,
         }),
       });
@@ -79,6 +101,8 @@ export default function IncidentTimeline({ incidentDraft }) {
 
       setForm({ ...emptyForm });
       await loadIncidents();
+
+      setMessage("Incident recorded successfully.");
     } catch (err) {
       setError(err.message);
     } finally {
@@ -86,14 +110,68 @@ export default function IncidentTimeline({ incidentDraft }) {
     }
   }
 
+  // Delete an existing incident
+  async function deleteIncident(id) {
+    const confirmed = window.confirm(
+      "Are you sure you want to permanently delete this incident? The incident will be removed from the timeline and future reports. Linked evidence files will not be deleted."
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setDeletingId(id);
+    setError("");
+    setMessage("");
+
+    try {
+      const response = await fetch(
+        `${API}/incidents/${encodeURIComponent(id)}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response
+          .json()
+          .catch(() => ({}));
+
+        throw new Error(
+          typeof errorData.detail === "string"
+            ? errorData.detail
+            : "Could not delete incident."
+        );
+      }
+
+      // Remove the deleted incident from the timeline
+      setIncidents((previous) =>
+        previous.filter(
+          (incident) => incident.id !== id
+        )
+      );
+
+      setMessage("Incident deleted successfully.");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setDeletingId(null);
+    }
+  }
+
+  // Download incident PDF report
   async function downloadReport() {
     setError("");
 
     try {
-      const response = await fetch(`${API}/incidents/report`);
+      const response = await fetch(
+        `${API}/incidents/report`
+      );
 
       if (!response.ok) {
-        throw new Error("Add an incident before exporting.");
+        throw new Error(
+          "Add an incident before exporting."
+        );
       }
 
       const blob = await response.blob();
@@ -104,7 +182,9 @@ export default function IncidentTimeline({ incidentDraft }) {
       link.download = "digitalshield-report.pdf";
       link.click();
 
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      setTimeout(() => {
+        URL.revokeObjectURL(url);
+      }, 1000);
     } catch (err) {
       setError(err.message);
     }
@@ -119,7 +199,11 @@ export default function IncidentTimeline({ incidentDraft }) {
         a structured PDF report.
       </p>
 
-      <form onSubmit={addIncident} className="incident-form">
+      {/* Incident Form */}
+      <form
+        onSubmit={addIncident}
+        className="incident-form"
+      >
         <label>
           Incident title
           <input
@@ -178,28 +262,48 @@ export default function IncidentTimeline({ incidentDraft }) {
             value={form.evidence_id}
             onChange={update}
           >
-            <option value="">No evidence selected</option>
+            <option value="">
+              No evidence selected
+            </option>
+
             {evidenceFiles.map((file) => (
-              <option key={file.id} value={file.id}>
-                {file.filename} — {file.sha256.slice(0, 12)}...
+              <option
+                key={file.id}
+                value={file.id}
+              >
+                {file.filename} —{" "}
+                {file.sha256.slice(0, 12)}...
               </option>
             ))}
           </select>
         </label>
 
-        <button type="submit" disabled={saving}>
+        <button
+          type="submit"
+          disabled={saving}
+        >
           {saving ? "Saving..." : "Add Incident"}
         </button>
       </form>
 
+      {/* Status Messages */}
       {error && (
         <p className="error" role="alert">
           {error}
         </p>
       )}
 
+      {message && (
+        <p role="status">
+          {message}
+        </p>
+      )}
+
+      {/* Timeline Header */}
       <div className="timeline-header">
-        <h3>Recorded Incidents ({incidents.length})</h3>
+        <h3>
+          Recorded Incidents ({incidents.length})
+        </h3>
 
         <button
           type="button"
@@ -210,25 +314,62 @@ export default function IncidentTimeline({ incidentDraft }) {
         </button>
       </div>
 
+      {/* Incident Timeline */}
       {incidents.length === 0 ? (
-        <p className="muted">No incidents recorded yet.</p>
+        <p className="muted">
+          No incidents recorded yet.
+        </p>
       ) : (
         <div className="timeline">
           {incidents.map((incident) => (
-            <article className="timeline-item" key={incident.id}>
+            <article
+              className="timeline-item"
+              key={incident.id}
+            >
               <small>
-                {new Date(incident.occurred_at).toLocaleString()}
+                {new Date(
+                  incident.occurred_at
+                ).toLocaleString()}
               </small>
 
               <h4>{incident.title}</h4>
-              <strong>{incident.category}</strong>
-              <p>{incident.description}</p>
+
+              <strong>
+                {incident.category}
+              </strong>
+
+              <p>
+                {incident.description}
+              </p>
 
               {incident.evidence_id && (
                 <small>
-                  Evidence reference: {incident.evidence_id}
+                  Evidence reference:{" "}
+                  {incident.evidence_id}
                 </small>
               )}
+
+              {/* Delete Incident Button */}
+              <div
+                style={{
+                  marginTop: "14px",
+                }}
+              >
+                <button
+                  type="button"
+                  className="delete-evidence-btn"
+                  onClick={() =>
+                    deleteIncident(incident.id)
+                  }
+                  disabled={
+                    deletingId === incident.id
+                  }
+                >
+                  {deletingId === incident.id
+                    ? "Deleting..."
+                    : "🗑 Delete Incident"}
+                </button>
+              </div>
             </article>
           ))}
         </div>

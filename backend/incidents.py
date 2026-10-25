@@ -326,3 +326,37 @@ def export_report():
             'attachment; filename="digitalshield-report.pdf"'
         },
     )
+
+
+
+@router.delete("/{incident_id}")
+def delete_incident(incident_id: str):
+    with connect(INCIDENT_DB) as db:
+        record = db.execute(
+            """
+            SELECT id
+            FROM incidents
+            WHERE id = ?
+            """,
+            (incident_id,)
+        ).fetchone()
+
+        if record is None:
+            raise HTTPException(
+                status_code=404,
+                detail="Incident not found."
+            )
+
+        db.execute(
+            """
+            DELETE FROM incidents
+            WHERE id = ?
+            """,
+            (incident_id,)
+        )
+
+    return {
+        "message": "Incident deleted successfully.",
+        "id": incident_id
+    }
+
