@@ -1,3 +1,4 @@
+from enhanced_report import router as enhanced_report_router
 from incident_media import router as incident_media_router
 from media_evidence import router as media_router
 from incidents import router as incidents_router
@@ -11,6 +12,8 @@ from analyzer import analyze_conversation
 app = FastAPI(title="DigitalShield AI")
 app.include_router(media_router)
 app.include_router(incident_media_router)
+
+app.include_router(enhanced_report_router)
 
 app.add_middleware(
     CORSMiddleware,

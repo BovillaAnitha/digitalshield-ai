@@ -416,6 +416,38 @@ Explanation: ${finding.explanation}`
           <IncidentMedia />
           </div>
 
+
+          <section className="panel">
+            <span className="section-eyebrow">ENHANCED REPORTING</span>
+              <h2>Complete Incident & Media Report</h2>
+
+              <p className="muted">
+                Generate a PDF containing documented incidents,
+                linked audio/video evidence, SHA-256 fingerprints,
+                and file integrity results.
+              </p>
+
+              <button
+                type="button"
+                onClick={() => {
+                const confirmed = window.confirm(
+                "This report may contain sensitive information. " +
+                "Download it only on a device you trust. Continue?"
+            );
+
+            if (confirmed) {
+              window.open(
+                "http://127.0.0.1:8000/reports/enhanced",
+                "_blank",
+                "noopener,noreferrer"
+              );
+            }
+            }}
+            >
+          Download Enhanced PDF Report
+          </button>
+          </section>
+
           {activePage === "emergency" && (
             <EmergencyContacts />
           )}
