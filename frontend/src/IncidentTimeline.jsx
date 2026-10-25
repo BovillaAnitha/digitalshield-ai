@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from "react";
 
-const API = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+const API = "https://digitalshield-ai-api.onrender.com";
 
 const emptyForm = {
   title: "",

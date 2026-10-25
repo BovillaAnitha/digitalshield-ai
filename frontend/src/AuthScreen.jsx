@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 
-const API = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+const API = "https://digitalshield-ai-api.onrender.com";
 
 export default function AuthScreen({ onSuccess }) {
   const [registering, setRegistering] = useState(false);
@@ -18,7 +18,7 @@ export default function AuthScreen({ onSuccess }) {
 
     try {
       const endpoint = registering ? "register" : "login";
-      const API = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+      const API = "https://digitalshield-ai-api.onrender.com";
 
       const response = await fetch(`${API}/auth/${endpoint}`, {
         method: "POST",
