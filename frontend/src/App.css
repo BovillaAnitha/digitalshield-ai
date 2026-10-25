@@ -1383,3 +1383,152 @@ textarea:focus {
     transition: none;
   }
 }
+
+
+
+/* =========================================
+   DigitalShield AI - Premium Sidebar
+   ========================================= */
+
+.sidebar {
+  width: 260px;
+  min-width: 260px;
+  background: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    #fcfaff 55%,
+    #f8f4ff 100%
+  );
+  border-right: 1px solid #e8def3;
+  box-shadow: 4px 0 24px rgba(66, 40, 110, 0.035);
+  padding: 28px 16px;
+}
+
+/* Brand */
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 4px 9px 30px;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #eee8f5;
+}
+
+.brand-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 15px;
+  background: linear-gradient(
+    135deg,
+    #5a329a,
+    #9468d9
+  );
+  box-shadow: 0 6px 16px rgba(102, 59, 168, 0.22);
+  display: grid;
+  place-items: center;
+  font-size: 24px;
+}
+
+.sidebar-brand h2 {
+  color: #472678;
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.sidebar-brand p {
+  color: #8b7d99;
+  font-size: 11px;
+  margin-top: 5px;
+}
+
+/* Navigation label */
+
+.sidebar-label {
+  color: #9889a7;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.6px;
+  padding: 0 14px;
+  margin: 8px 0 14px;
+}
+
+/* Navigation container */
+
+.sidebar-nav {
+  display: grid;
+  gap: 7px;
+}
+
+/* Sidebar navigation buttons */
+
+.sidebar-nav button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 15px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #625775;
+  font-size: 13px;
+  font-weight: 650;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: none;
+  transition:
+    background-color 0.18s ease,
+    color 0.18s ease,
+    border-color 0.18s ease;
+}
+
+.sidebar-nav button:hover {
+  background: #f1eafb;
+  color: #593295;
+  transform: none;
+}
+
+/* Active page */
+
+.sidebar-nav button.active,
+.sidebar-nav button[aria-current="page"] {
+  background: #eee5fb;
+  color: #552e94;
+  border-color: #ddcef3;
+  font-weight: 800;
+  box-shadow: inset 3px 0 0 #7950be;
+}
+
+/* Sidebar button icons */
+
+.sidebar-nav button svg,
+.sidebar-nav button .nav-icon {
+  width: 19px;
+  height: 19px;
+  flex-shrink: 0;
+}
+
+/* Keyboard accessibility */
+
+.sidebar-nav button:focus-visible {
+  outline: 3px solid #b89af1;
+  outline-offset: 2px;
+}
+
+/* Sidebar scrolling for smaller screens */
+
+.sidebar {
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #d5c4ec transparent;
+}
+
+/* Respect reduced motion preferences */
+
+@media (prefers-reduced-motion: reduce) {
+  .sidebar-nav button {
+    transition: none;
+  }
+}
