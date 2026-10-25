@@ -1,4 +1,4 @@
-
+import IncidentSearch from "./IncidentSearch";
 import { useState } from "react";
 import EvidenceVault from "./EvidenceVault";
 import IncidentTimeline from "./IncidentTimeline";
@@ -401,12 +401,13 @@ Explanation: ${finding.explanation}`
           {/* Keep mounted so saved drafts survive navigation */}
           <div
             id="incident-timeline"
-            style={{
-              display:
-                activePage === "incidents" ? "block" : "none",
-            }}
+              style={{
+                display:
+                  activePage === "incidents" ? "block" : "none",
+          }}
           >
-            <IncidentTimeline incidentDraft={incidentDraft} />
+          <IncidentTimeline incidentDraft={incidentDraft} />
+          <IncidentSearch />
           </div>
 
           {activePage === "emergency" && (

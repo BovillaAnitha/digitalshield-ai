@@ -734,3 +734,26 @@ button:disabled {
     align-items: stretch;
   }
 }
+
+
+
+.incident-search-controls {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 15px;
+  margin: 22px 0;
+}
+
+.incident-search-controls label {
+  display: grid;
+  gap: 8px;
+  color: #503174;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+@media (max-width: 760px) {
+  .incident-search-controls {
+    grid-template-columns: 1fr;
+  }
+}
