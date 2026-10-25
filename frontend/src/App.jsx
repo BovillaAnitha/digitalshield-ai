@@ -1,6 +1,7 @@
-import IncidentTimeline from "./IncidentTimeline";
-import EvidenceVault from "./EvidenceVault";
+
 import { useState } from "react";
+import EvidenceVault from "./EvidenceVault";
+import IncidentTimeline from "./IncidentTimeline";
 import "./App.css";
 
 const example = `Hey, why aren't you replying?
@@ -11,6 +12,7 @@ I'll share your private photos unless you respond.`;
 function App() {
   const [conversation, setConversation] = useState(example);
   const [result, setResult] = useState(null);
+  const [incidentDraft, setIncidentDraft] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -42,27 +44,58 @@ function App() {
     }
   }
 
+  function createIncidentFromAnalysis() {
+    if (!result) return;
+
+    const findings = result.findings.map(
+      (finding) =>
+        `Message ${finding.message_number}: ${finding.message}
+Category: ${finding.category}
+Explanation: ${finding.explanation}`
+    );
+
+    const description = findings.length
+      ? findings.join("\n\n")
+      : "Conversation reviewed. No predefined warning patterns detected.";
+
+    setIncidentDraft({
+      title: "Conversation safety concern",
+      description: description.slice(0, 3000),
+      category: "Harassment",
+      occurred_at: "",
+      evidence_id: "",
+    });
+
+    setTimeout(() => {
+      document
+        .getElementById("incident-timeline")
+        ?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
+  }
+
   return (
     <div className="app">
       <header className="header">
         <div className="brand">🛡 DigitalShield AI</div>
-        <span className="subtitle">Digital Safety Assistant</span>
+        <span className="subtitle">
+          Explainable Digital Safety Assistant
+        </span>
       </header>
 
       <main className="container">
         <section className="hero">
           <h1>Understand the warning signs.</h1>
           <p>
-            Review conversations for potential harassment,
-            intimidation and coercion.
+            Analyze conversations, document incidents,
+            and preserve evidence fingerprints.
           </p>
         </section>
 
         <section className="panel">
           <h2>Conversation Analyzer</h2>
           <p className="muted">
-            Enter one message per line. Use fictional data
-            while testing this prototype.
+            Enter one message per line. Use fictional
+            conversations for testing.
           </p>
 
           <textarea
@@ -129,6 +162,7 @@ function App() {
                     Message {finding.message_number}:{" "}
                     "{finding.message}"
                   </p>
+
                   <p>{finding.explanation}</p>
                 </div>
               ))
@@ -142,10 +176,21 @@ function App() {
             </ul>
 
             <p className="disclaimer">{result.disclaimer}</p>
+
+            <button
+              type="button"
+              onClick={createIncidentFromAnalysis}
+            >
+              Create Incident from Analysis
+            </button>
           </section>
         )}
+
         <EvidenceVault />
-        <IncidentTimeline />
+
+        <div id="incident-timeline">
+          <IncidentTimeline incidentDraft={incidentDraft} />
+        </div>
       </main>
     </div>
   );

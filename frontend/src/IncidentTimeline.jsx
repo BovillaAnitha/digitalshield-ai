@@ -3,17 +3,20 @@ import { useEffect, useState } from "react";
 
 const API = "http://127.0.0.1:8000";
 
-export default function IncidentTimeline() {
+const emptyForm = {
+  title: "",
+  description: "",
+  category: "Harassment",
+  occurred_at: "",
+  evidence_id: "",
+};
+
+export default function IncidentTimeline({ incidentDraft }) {
   const [incidents, setIncidents] = useState([]);
+  const [evidenceFiles, setEvidenceFiles] = useState([]);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({
-    title: "",
-    description: "",
-    category: "Harassment",
-    occurred_at: "",
-    evidence_id: "",
-  });
+  const [form, setForm] = useState(emptyForm);
 
   async function loadIncidents() {
     try {
@@ -25,15 +28,33 @@ export default function IncidentTimeline() {
     }
   }
 
+  async function loadEvidence() {
+    try {
+      const response = await fetch(`${API}/evidence`);
+      if (!response.ok) throw new Error("Could not load evidence.");
+      setEvidenceFiles(await response.json());
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
   useEffect(() => {
     loadIncidents();
+    loadEvidence();
   }, []);
 
+  useEffect(() => {
+    if (incidentDraft) {
+      setForm(incidentDraft);
+      loadEvidence();
+    }
+  }, [incidentDraft]);
+
   function update(event) {
-    setForm({
-      ...form,
+    setForm((previous) => ({
+      ...previous,
       [event.target.name]: event.target.value,
-    });
+    }));
   }
 
   async function addIncident(event) {
@@ -48,20 +69,15 @@ export default function IncidentTimeline() {
         body: JSON.stringify({
           ...form,
           occurred_at: new Date(form.occurred_at).toISOString(),
-          evidence_id: form.evidence_id.trim() || null,
+          evidence_id: form.evidence_id || null,
         }),
       });
 
-      if (!response.ok) throw new Error("Could not save incident.");
+      if (!response.ok) {
+        throw new Error("Could not save incident.");
+      }
 
-      setForm({
-        title: "",
-        description: "",
-        category: "Harassment",
-        occurred_at: "",
-        evidence_id: "",
-      });
-
+      setForm({ ...emptyForm });
       await loadIncidents();
     } catch (err) {
       setError(err.message);
@@ -82,6 +98,7 @@ export default function IncidentTimeline() {
 
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
+
       const link = document.createElement("a");
       link.href = url;
       link.download = "digitalshield-report.pdf";
@@ -96,9 +113,10 @@ export default function IncidentTimeline() {
   return (
     <section className="panel">
       <h2>📅 Incident Timeline</h2>
+
       <p className="muted">
-        Document events chronologically using fictional
-        information for this prototype.
+        Record incidents, attach evidence, and generate
+        a structured PDF report.
       </p>
 
       <form onSubmit={addIncident} className="incident-form">
@@ -147,20 +165,26 @@ export default function IncidentTimeline() {
             value={form.description}
             onChange={update}
             placeholder="Describe what happened..."
-            rows={4}
+            rows={5}
             maxLength={3000}
             required
           />
         </label>
 
         <label>
-          Evidence ID (optional)
-          <input
+          Attach Evidence (optional)
+          <select
             name="evidence_id"
             value={form.evidence_id}
             onChange={update}
-            placeholder="Paste ID from Evidence Vault"
-          />
+          >
+            <option value="">No evidence selected</option>
+            {evidenceFiles.map((file) => (
+              <option key={file.id} value={file.id}>
+                {file.filename} — {file.sha256.slice(0, 12)}...
+              </option>
+            ))}
+          </select>
         </label>
 
         <button type="submit" disabled={saving}>
@@ -168,10 +192,15 @@ export default function IncidentTimeline() {
         </button>
       </form>
 
-      {error && <p className="error" role="alert">{error}</p>}
+      {error && (
+        <p className="error" role="alert">
+          {error}
+        </p>
+      )}
 
       <div className="timeline-header">
         <h3>Recorded Incidents ({incidents.length})</h3>
+
         <button
           type="button"
           onClick={downloadReport}
@@ -190,9 +219,11 @@ export default function IncidentTimeline() {
               <small>
                 {new Date(incident.occurred_at).toLocaleString()}
               </small>
+
               <h4>{incident.title}</h4>
               <strong>{incident.category}</strong>
               <p>{incident.description}</p>
+
               {incident.evidence_id && (
                 <small>
                   Evidence reference: {incident.evidence_id}
