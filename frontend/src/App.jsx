@@ -1,4 +1,4 @@
-
+import EmergencyContacts from "./EmergencyContacts";
 import { useState } from "react";
 import EvidenceVault from "./EvidenceVault";
 import IncidentTimeline from "./IncidentTimeline";
@@ -190,6 +190,7 @@ Explanation: ${finding.explanation}`
 
         <div id="incident-timeline">
           <IncidentTimeline incidentDraft={incidentDraft} />
+          <EmergencyContacts />
         </div>
       </main>
     </div>

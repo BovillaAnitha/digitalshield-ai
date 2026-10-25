@@ -321,3 +321,81 @@ li {
 .timeline-item small {
   color: #77718b;
 }
+
+
+
+
+.emergency-panel {
+  margin-top: 24px;
+}
+
+.helpline-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin: 20px 0;
+}
+
+.helpline-card,
+.trusted-contact-card {
+  border: 1px solid #e5daf5;
+  background: #faf7ff;
+  border-radius: 14px;
+  padding: 18px;
+}
+
+.helpline-card h4 {
+  margin: 0 0 10px;
+  color: #452079;
+}
+
+.helpline-number {
+  display: block;
+  color: #6438b5;
+  font-size: 30px;
+  margin-bottom: 8px;
+}
+
+.emergency-link {
+  display: inline-block;
+  padding: 10px 14px;
+  border-radius: 9px;
+  background: #6438b5;
+  color: white;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.emergency-link:hover {
+  background: #4c288f;
+}
+
+.trusted-contact-list {
+  margin-top: 20px;
+  display: grid;
+  gap: 12px;
+}
+
+.trusted-contact-card {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+}
+
+.contact-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+@media (max-width: 800px) {
+  .helpline-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .trusted-contact-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
