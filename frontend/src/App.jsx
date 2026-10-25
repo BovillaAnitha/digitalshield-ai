@@ -1,3 +1,5 @@
+import IncidentMedia from "./IncidentMedia";
+import MediaEvidence from "./MediaEvidence";
 import IncidentSearch from "./IncidentSearch";
 import { useState } from "react";
 import EvidenceVault from "./EvidenceVault";
@@ -395,7 +397,10 @@ Explanation: ${finding.explanation}`
           )}
 
           {activePage === "evidence" && (
-            <EvidenceVault />
+            <>
+              <EvidenceVault />
+              <MediaEvidence />
+            </>
           )}
 
           {/* Keep mounted so saved drafts survive navigation */}
@@ -408,6 +413,7 @@ Explanation: ${finding.explanation}`
           >
           <IncidentTimeline incidentDraft={incidentDraft} />
           <IncidentSearch />
+          <IncidentMedia />
           </div>
 
           {activePage === "emergency" && (
