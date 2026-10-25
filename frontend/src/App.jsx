@@ -9,8 +9,7 @@ import IncidentTimeline from "./IncidentTimeline";
 import EmergencyContacts from "./EmergencyContacts";
 import "./App.css";
 
-const API = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
-
+const API = "https://digitalshield-ai-api.onrender.com";
 const example = `Hey, why aren't you replying?
 I've sent you messages every day.
 You can't ignore me forever.
