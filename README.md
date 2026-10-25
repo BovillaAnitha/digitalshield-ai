@@ -122,7 +122,7 @@ Start the FastAPI server:
 uvicorn main:app --reload
 ```
 
-Backend URL: `http://127.0.0.1:8000`
+Backend URL: `https://digitalshield-ai-api.onrender.com`
 
 ### Frontend Setup
 

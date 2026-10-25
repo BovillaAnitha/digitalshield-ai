@@ -9,7 +9,7 @@ import IncidentTimeline from "./IncidentTimeline";
 import EmergencyContacts from "./EmergencyContacts";
 import "./App.css";
 
-const API = "http://127.0.0.1:8000";
+const API = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
 const example = `Hey, why aren't you replying?
 I've sent you messages every day.
