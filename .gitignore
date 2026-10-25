@@ -11,4 +11,4 @@ backend/*.db
 !.env.example
 backend/media_uploads/
 backend/media_evidence.db
-backend/incident_media.db
+backend/incide  nt_media.db
