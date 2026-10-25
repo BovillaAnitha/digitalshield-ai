@@ -1,20 +1,39 @@
-import EmergencyContacts from "./EmergencyContacts";
+
 import { useState } from "react";
 import EvidenceVault from "./EvidenceVault";
 import IncidentTimeline from "./IncidentTimeline";
+import EmergencyContacts from "./EmergencyContacts";
 import "./App.css";
 
+const API = "http://127.0.0.1:8000";
+
 const example = `Hey, why aren't you replying?
-I know which college you attend.
-If you block me, I'll create another account.
-I'll share your private photos unless you respond.`;
+I've sent you messages every day.
+You can't ignore me forever.
+I know where you live.`;
+
+const navigation = [
+  { id: "dashboard", icon: "▦", label: "Dashboard" },
+  { id: "analyzer", icon: "◈", label: "Conversation Analyzer" },
+  { id: "evidence", icon: "▣", label: "Evidence Vault" },
+  { id: "incidents", icon: "▤", label: "Incident Timeline" },
+  { id: "emergency", icon: "✚", label: "Emergency Assistance" },
+];
 
 function App() {
+  const [activePage, setActivePage] = useState("dashboard");
   const [conversation, setConversation] = useState(example);
   const [result, setResult] = useState(null);
   const [incidentDraft, setIncidentDraft] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  function navigate(page) {
+    setActivePage(page);
+    setSidebarOpen(false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
 
   async function analyze() {
     setLoading(true);
@@ -22,14 +41,11 @@ function App() {
     setResult(null);
 
     try {
-      const response = await fetch(
-        "http://127.0.0.1:8000/analyze",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text: conversation }),
-        }
-      );
+      const response = await fetch(`${API}/analyze`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: conversation }),
+      });
 
       if (!response.ok) {
         throw new Error("Analysis request failed.");
@@ -38,7 +54,7 @@ function App() {
       const data = await response.json();
       setResult(data);
     } catch (err) {
-      setError(err.message);
+      setError(err.message || "Something went wrong.");
     } finally {
       setLoading(false);
     }
@@ -47,16 +63,16 @@ function App() {
   function createIncidentFromAnalysis() {
     if (!result) return;
 
-    const findings = result.findings.map(
-      (finding) =>
-        `Message ${finding.message_number}: ${finding.message}
+    const description = result.findings.length
+      ? result.findings
+          .map(
+            (finding) =>
+              `Message ${finding.message_number}: ${finding.message}
 Category: ${finding.category}
 Explanation: ${finding.explanation}`
-    );
-
-    const description = findings.length
-      ? findings.join("\n\n")
-      : "Conversation reviewed. No predefined warning patterns detected.";
+          )
+          .join("\n\n")
+      : "Conversation reviewed. No predefined warning signs detected.";
 
     setIncidentDraft({
       title: "Conversation safety concern",
@@ -66,133 +82,343 @@ Explanation: ${finding.explanation}`
       evidence_id: "",
     });
 
-    setTimeout(() => {
-      document
-        .getElementById("incident-timeline")
-        ?.scrollIntoView({ behavior: "smooth" });
-    }, 100);
+    navigate("incidents");
   }
 
+  const showAnalyzer =
+    activePage === "dashboard" || activePage === "analyzer";
+
+  const pageTitle = {
+    dashboard: "Safety Dashboard",
+    analyzer: "Conversation Analyzer",
+    evidence: "Evidence Vault",
+    incidents: "Incident Timeline",
+    emergency: "Emergency Assistance",
+  }[activePage];
+
   return (
-    <div className="app">
-      <header className="header">
-        <div className="brand">🛡 DigitalShield AI</div>
-        <span className="subtitle">
-          Explainable Digital Safety Assistant
-        </span>
-      </header>
+    <div className="app dashboard-layout">
+      <aside
+        className={`sidebar ${sidebarOpen ? "sidebar-open" : ""}`}
+      >
+        <div className="sidebar-brand">
+          <div className="brand-icon">🛡</div>
+          <div>
+            <h2>DigitalShield AI</h2>
+            <p>Your Digital Safety Companion</p>
+          </div>
+        </div>
 
-      <main className="container">
-        <section className="hero">
-          <h1>Understand the warning signs.</h1>
-          <p>
-            Analyze conversations, document incidents,
-            and preserve evidence fingerprints.
-          </p>
-        </section>
+        <div className="sidebar-label">WORKSPACE</div>
 
-        <section className="panel">
-          <h2>Conversation Analyzer</h2>
-          <p className="muted">
-            Enter one message per line. Use fictional
-            conversations for testing.
-          </p>
-
-          <textarea
-            value={conversation}
-            onChange={(e) => setConversation(e.target.value)}
-            placeholder="Paste conversation messages..."
-            rows={8}
-          />
-
-          <button
-            onClick={analyze}
-            disabled={loading || !conversation.trim()}
-          >
-            {loading ? "Analyzing..." : "Analyze Conversation"}
-          </button>
-
-          {error && <p className="error">{error}</p>}
-        </section>
-
-        {result && (
-          <section className="panel results">
-            <div className="result-header">
-              <h2>Analysis Results</h2>
-              <span className={`risk ${result.overall_level}`}>
-                {result.overall_level.toUpperCase()} CONCERN
+        <nav className="sidebar-nav" aria-label="Main navigation">
+          {navigation.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              className={`nav-item ${
+                activePage === item.id ? "active" : ""
+              }`}
+              onClick={() => navigate(item.id)}
+              aria-current={
+                activePage === item.id ? "page" : undefined
+              }
+            >
+              <span className="nav-icon" aria-hidden="true">
+                {item.icon}
               </span>
+              <span>{item.label}</span>
+            </button>
+          ))}
+        </nav>
+
+        <div className="sidebar-bottom">
+          <div className="sidebar-help">
+            <span>♡ Safety comes first</span>
+            <p>
+              Your documentation tools are one click away.
+            </p>
+          </div>
+          <small>DigitalShield AI · Prototype</small>
+        </div>
+      </aside>
+
+      {sidebarOpen && (
+        <button
+          type="button"
+          className="sidebar-overlay"
+          aria-label="Close navigation"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      <div className="dashboard-main">
+        <header className="topbar">
+          <div className="topbar-left">
+            <button
+              type="button"
+              className="menu-toggle"
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              aria-label="Toggle navigation"
+            >
+              ☰
+            </button>
+            <div>
+              <h1>{pageTitle}</h1>
+              <p>Digital safety, documentation and support</p>
             </div>
+          </div>
 
-            <div className="stats">
-              <div>
-                <strong>{result.total_messages}</strong>
-                <span>Messages reviewed</span>
+          <div className="topbar-status">
+            <span className="status-dot" />
+            Local Prototype
+          </div>
+        </header>
+
+        <main className="dashboard-content">
+          {activePage === "dashboard" && (
+            <>
+              <section className="welcome-banner">
+                <div>
+                  <span className="welcome-eyebrow">
+                    YOUR SAFETY WORKSPACE
+                  </span>
+                  <h2>Take control of your digital safety.</h2>
+                  <p>
+                    Understand warning signs, preserve evidence,
+                    document incidents, and access support.
+                  </p>
+                  <button
+                    type="button"
+                    className="welcome-button"
+                    onClick={() => navigate("analyzer")}
+                  >
+                    Analyze a Conversation →
+                  </button>
+                </div>
+                <div className="welcome-symbol" aria-hidden="true">
+                  🛡
+                </div>
+              </section>
+
+              <div className="overview-grid">
+                <button
+                  type="button"
+                  className="overview-card"
+                  onClick={() => navigate("analyzer")}
+                >
+                  <span className="overview-icon purple">◈</span>
+                  <strong>Analyze Conversations</strong>
+                  <span>
+                    Understand potential warning signs
+                  </span>
+                  <em>Open Analyzer →</em>
+                </button>
+
+                <button
+                  type="button"
+                  className="overview-card"
+                  onClick={() => navigate("evidence")}
+                >
+                  <span className="overview-icon pink">▣</span>
+                  <strong>Preserve Evidence</strong>
+                  <span>
+                    Store files and verify fingerprints
+                  </span>
+                  <em>Open Evidence Vault →</em>
+                </button>
+
+                <button
+                  type="button"
+                  className="overview-card"
+                  onClick={() => navigate("incidents")}
+                >
+                  <span className="overview-icon blue">▤</span>
+                  <strong>Document Incidents</strong>
+                  <span>
+                    Create timelines and PDF reports
+                  </span>
+                  <em>Open Timeline →</em>
+                </button>
               </div>
-              <div>
-                <strong>{result.flagged_messages}</strong>
-                <span>Messages flagged</span>
-              </div>
-              <div>
-                <strong>{result.findings.length}</strong>
-                <span>Warning signs</span>
-              </div>
-            </div>
+            </>
+          )}
 
-            <p>{result.summary}</p>
+          {showAnalyzer && (
+            <>
+              <section className="panel analyzer-panel">
+                <div className="section-heading">
+                  <div>
+                    <span className="section-eyebrow">
+                      EXPLAINABLE SCREENING
+                    </span>
+                    <h2>Conversation Analyzer</h2>
+                    <p className="muted">
+                      Paste one message per line to identify
+                      potential warning signs.
+                    </p>
+                  </div>
+                  <span className="feature-pill">
+                    Rule-based analysis
+                  </span>
+                </div>
 
-            <h3>Detected Warning Signs</h3>
+                <label
+                  className="field-label"
+                  htmlFor="conversation-input"
+                >
+                  Conversation Messages
+                </label>
 
-            {result.findings.length === 0 ? (
-              <p>
-                No predefined warning patterns detected.
-                This does not mean the conversation is safe.
-              </p>
-            ) : (
-              result.findings.map((finding, index) => (
-                <div className="finding" key={index}>
-                  <div className="finding-title">
-                    <strong>{finding.category}</strong>
-                    <span className={`risk ${finding.level}`}>
-                      {finding.level}
+                <textarea
+                  id="conversation-input"
+                  className="conversation-input"
+                  value={conversation}
+                  onChange={(event) =>
+                    setConversation(event.target.value)
+                  }
+                  rows={7}
+                  placeholder="Paste conversation messages..."
+                />
+
+                <div className="analyzer-actions">
+                  <span className="muted">
+                    Use fictional messages for testing.
+                  </span>
+                  <button
+                    type="button"
+                    onClick={analyze}
+                    disabled={loading || !conversation.trim()}
+                  >
+                    {loading
+                      ? "Analyzing..."
+                      : "◈ Analyze Conversation"}
+                  </button>
+                </div>
+
+                {error && (
+                  <p className="error" role="alert">
+                    {error}
+                  </p>
+                )}
+              </section>
+
+              {result && (
+                <section className="panel results">
+                  <div className="result-header">
+                    <div>
+                      <span className="section-eyebrow">
+                        ANALYSIS COMPLETE
+                      </span>
+                      <h2>Safety Analysis Results</h2>
+                    </div>
+
+                    <span
+                      className={`risk ${result.overall_level}`}
+                    >
+                      {result.overall_level.toUpperCase()} CONCERN
                     </span>
                   </div>
 
-                  <p className="message">
-                    Message {finding.message_number}:{" "}
-                    "{finding.message}"
+                  <div className="stats">
+                    <div>
+                      <strong>{result.total_messages}</strong>
+                      <span>Messages Reviewed</span>
+                    </div>
+                    <div>
+                      <strong>{result.flagged_messages}</strong>
+                      <span>Messages Flagged</span>
+                    </div>
+                    <div>
+                      <strong>{result.findings.length}</strong>
+                      <span>Warning Signs</span>
+                    </div>
+                  </div>
+
+                  <p className="analysis-summary">
+                    {result.summary}
                   </p>
 
-                  <p>{finding.explanation}</p>
-                </div>
-              ))
-            )}
+                  <h3>Detected Warning Signs</h3>
 
-            <h3>Suggested Safety Steps</h3>
-            <ul>
-              {result.recommendations.map((item, index) => (
-                <li key={index}>{item}</li>
-              ))}
-            </ul>
+                  {result.findings.length === 0 ? (
+                    <p className="muted">
+                      No predefined warning patterns detected.
+                      This does not guarantee safety.
+                    </p>
+                  ) : (
+                    result.findings.map((finding, index) => (
+                      <article
+                        className="finding"
+                        key={`${finding.message_number}-${index}`}
+                      >
+                        <div className="finding-title">
+                          <strong>{finding.category}</strong>
+                          <span className={`risk ${finding.level}`}>
+                            {finding.level}
+                          </span>
+                        </div>
 
-            <p className="disclaimer">{result.disclaimer}</p>
+                        <p className="message">
+                          <strong>
+                            Message {finding.message_number}:
+                          </strong>{" "}
+                          {finding.message}
+                        </p>
 
-            <button
-              type="button"
-              onClick={createIncidentFromAnalysis}
-            >
-              Create Incident from Analysis
-            </button>
-          </section>
-        )}
+                        <p>{finding.explanation}</p>
+                      </article>
+                    ))
+                  )}
 
-        <EvidenceVault />
+                  <h3>Suggested Safety Steps</h3>
+                  <ul className="safety-list">
+                    {result.recommendations.map((item, index) => (
+                      <li key={index}>{item}</li>
+                    ))}
+                  </ul>
 
-        <div id="incident-timeline">
-          <IncidentTimeline incidentDraft={incidentDraft} />
-          <EmergencyContacts />
-        </div>
-      </main>
+                  <p className="disclaimer">
+                    {result.disclaimer}
+                  </p>
+
+                  <button
+                    type="button"
+                    onClick={createIncidentFromAnalysis}
+                    className="create-incident-button"
+                  >
+                    + Create Incident from Analysis
+                  </button>
+                </section>
+              )}
+            </>
+          )}
+
+          {activePage === "evidence" && (
+            <EvidenceVault />
+          )}
+
+          {/* Keep mounted so saved drafts survive navigation */}
+          <div
+            id="incident-timeline"
+            style={{
+              display:
+                activePage === "incidents" ? "block" : "none",
+            }}
+          >
+            <IncidentTimeline incidentDraft={incidentDraft} />
+          </div>
+
+          {activePage === "emergency" && (
+            <EmergencyContacts />
+          )}
+
+          <footer className="dashboard-footer">
+            DigitalShield AI · Explainable Digital Safety
+            · Hackathon Prototype
+          </footer>
+        </main>
+      </div>
     </div>
   );
 }
