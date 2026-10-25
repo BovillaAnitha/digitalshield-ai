@@ -1,4 +1,4 @@
-
+import { confirmEvidenceUpload } from "./privacyConfirm";
 import { useEffect, useState } from "react";
 
 const API = "http://127.0.0.1:8000";
@@ -26,6 +26,11 @@ export default function EvidenceVault() {
 
   async function uploadEvidence(event) {
     event.preventDefault();
+
+    if (!confirmEvidenceUpload()) {
+    return;
+  }
+
 
     if (!file) {
       setMessage("Please select a file.");

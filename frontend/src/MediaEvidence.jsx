@@ -1,4 +1,5 @@
 
+import { confirmEvidenceUpload } from "./privacyConfirm";
 import { useEffect, useState } from "react";
 
 const API = "http://127.0.0.1:8000";
@@ -12,6 +13,9 @@ export default function MediaEvidence() {
 
   async function refresh() {
     try {
+        if (!confirmEvidenceUpload()) {
+  return;
+}
       const response = await fetch(`${API}/media-evidence`);
       if (!response.ok) throw new Error("Unable to load media.");
 
