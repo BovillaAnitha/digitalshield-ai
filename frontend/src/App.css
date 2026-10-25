@@ -757,3 +757,126 @@ button:disabled {
     grid-template-columns: 1fr;
   }
 }
+
+
+
+
+/* Privacy & Safety Center */
+
+.privacy-center {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.privacy-warning {
+  margin-top: 18px;
+  padding: 20px;
+  border-radius: 14px;
+  background: #fff4e5;
+  border: 1px solid #f0c989;
+  color: #74451a;
+}
+
+.privacy-warning h3 {
+  margin-top: 0;
+  color: #74451a;
+}
+
+.privacy-warning p {
+  line-height: 1.65;
+}
+
+.privacy-progress {
+  height: 10px;
+  width: 100%;
+  margin: 14px 0 22px;
+  border-radius: 20px;
+  background: #e9e4f3;
+  overflow: hidden;
+}
+
+.privacy-progress-fill {
+  height: 100%;
+  background: #8054c7;
+  border-radius: 20px;
+  transition: width 0.2s ease;
+}
+
+.privacy-checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.privacy-check-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 13px;
+  border: 1px solid #e9e2f1;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.privacy-check-item input {
+  margin-top: 4px;
+  accent-color: #8054c7;
+  width: 17px;
+  height: 17px;
+}
+
+.privacy-success {
+  color: #246b45;
+  font-weight: 600;
+  margin-top: 16px;
+}
+
+.privacy-tips {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.privacy-tip {
+  background: #f8f6fc;
+  padding: 18px;
+  border-radius: 12px;
+  border: 1px solid #ece6f5;
+}
+
+.privacy-tip h3 {
+  margin-top: 0;
+  color: #57358a;
+}
+
+.privacy-tip p {
+  line-height: 1.6;
+}
+
+.privacy-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 18px 0;
+}
+
+.privacy-exit-button {
+  background: #a82e49;
+  color: white;
+}
+
+.privacy-exit-button:hover {
+  background: #87243a;
+}
+
+@media (max-width: 650px) {
+  .privacy-tips {
+    grid-template-columns: 1fr;
+  }
+
+  .privacy-actions {
+    flex-direction: column;
+  }
+}

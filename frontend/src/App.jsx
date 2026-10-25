@@ -1,3 +1,4 @@
+import PrivacySafety from "./PrivacySafety";
 import IncidentMedia from "./IncidentMedia";
 import MediaEvidence from "./MediaEvidence";
 import IncidentSearch from "./IncidentSearch";
@@ -20,6 +21,7 @@ const navigation = [
   { id: "evidence", icon: "▣", label: "Evidence Vault" },
   { id: "incidents", icon: "▤", label: "Incident Timeline" },
   { id: "emergency", icon: "✚", label: "Emergency Assistance" },
+  { id: "privacy", label: "Privacy & Safety" },
 ];
 
 function App() {
@@ -416,7 +418,7 @@ Explanation: ${finding.explanation}`
           <IncidentMedia />
           </div>
 
-
+          {activePage === "incidents" && (
           <section className="panel">
             <span className="section-eyebrow">ENHANCED REPORTING</span>
               <h2>Complete Incident & Media Report</h2>
@@ -447,10 +449,12 @@ Explanation: ${finding.explanation}`
           Download Enhanced PDF Report
           </button>
           </section>
+          )}
 
           {activePage === "emergency" && (
             <EmergencyContacts />
           )}
+          {activePage === "privacy" && <PrivacySafety />}
 
           <footer className="dashboard-footer">
             DigitalShield AI · Explainable Digital Safety
