@@ -1,3 +1,4 @@
+import DashboardWelcome from "./DashboardWelcome";
 import PrivacySafety from "./PrivacySafety";
 import IncidentMedia from "./IncidentMedia";
 import MediaEvidence from "./MediaEvidence";
